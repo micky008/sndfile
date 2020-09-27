@@ -6,57 +6,61 @@ public class NewMain {
 
     public static void main(String[] args) {
         try {
-            
-            final int BUFFER = 65535;
-            
+
             // Open the wav file specified as the first argument
             WavFile wavFile = WavFile.openWavFile(new File("C:\\ffmpeg\\carpenter-brut-trilogy.wav"));
 
-            // Get the number of audio channels in the wav file
-            //int numChannels = wavFile.getNumChannels();
+            long nsc2 = wavFile.getNumFrames();            // 1 frame = value gauche + droite combiné.
+            System.out.println("nombe de frames = " + nsc2);
+            System.out.println("temps en seconde = " + nsc2 / 44100);
 
-            // Create a buffer of 100 frames
-            long nsc2 = wavFile.getNumFrames();
-            
-            double[] buffer = new double[nsc2 > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)nsc2];
+            double[] buffer = new double[nsc2 * 2 > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) nsc2 * 2]; //x2 pour stocker la valeure gauche et droite décodé
             final int SAMPLE = buffer.length / 2;
 
-            int sampleCount;
+            int sampleCount = 1;
 
             double gauche;
             double droite;
-            boolean endWrite = false;
-            boolean previous0 = false;
-            int nbSong = 0;
-            do {
-                sampleCount = wavFile.readFrames(buffer, SAMPLE);                
-                endWrite = false;
+            int nbSong = 1;
+            while (sampleCount > 0) {
+                sampleCount = wavFile.readFrames(buffer, SAMPLE);
+                System.out.println("sampleCount lu=" + sampleCount);
                 for (int i = 0; i < sampleCount; i++) {
                     gauche = buffer[i * 2];
-
                     droite = buffer[i * 2 + 1];
-
-                    //System.out.println(gauche + " " + droite);
                     if (gauche == 0f && droite == 0f) {
-                        if (!endWrite && !previous0) {
-                            endWrite = true;
-                            previous0 = true;
+                        int nbBlank = 0;
+                        for (int j = i; j < sampleCount; j++, i++) {
+                            gauche = buffer[j * 2];
+                            droite = buffer[j * 2 + 1];
+                            if (gauche == 0f && droite == 0f) {
+                                nbBlank++;
+                            } else {
+                                break;
+                            }
+                        }
+                        if (nbBlank > 21000) { //21000 < 500ms                       
                             nbSong++;
                         }
-                        continue;
                     }
-                    previous0 = false;
-
                 }
-            } while (sampleCount > 0);
-            // Close the wavFile
+            }
             wavFile.close();
             System.out.println("Nb songs : " + nbSong);
 
-            // Output the minimum and maximum value
-            //  System.out.printf("Min: %f, Max: %f\n", min, max);
         } catch (Exception e) {
             System.err.println(e);
         }
+    }
+
+    private static boolean have0after(int i, double buffer[], int limit) {
+        if (i >= limit) {
+            return false;
+        }
+        int j = i + 1;
+        double gauche = buffer[j * 2];
+        double droite = buffer[j * 2 + 1];
+        return gauche == 0f && droite == 0f;
+
     }
 }

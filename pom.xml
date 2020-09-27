@@ -13,9 +13,9 @@
     
     <dependencies>
         <dependency>
-            <groupId>edu.cornell</groupId>
-            <artifactId>libsndfile-wrapper</artifactId>
-            <version>0.1</version>
+            <groupId>javazoom</groupId>
+            <artifactId>jlayer</artifactId>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
     
