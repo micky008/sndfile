@@ -17,6 +17,11 @@
             <artifactId>jlayer</artifactId>
             <version>1.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>edu.cornell</groupId>
+            <artifactId>libsndfile-wrapper</artifactId>
+            <version>0.1</version>
+        </dependency>
     </dependencies>
     
 </project>
