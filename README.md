@@ -1,9 +1,5 @@
 # sndfile
 
-1) installer libsndfile-wrapper-rCURRENT dnas son repo local (copier coller la ligne en dessous).
+en C il a été compiler en mingw64.  
+via msys2 https://www.msys2.org/ package "toolchain" et "sndfile" 
 
-`mvn install:install-file -Dfile=./libsndfile-wrapper-rCURRENT.jar -DgroupId=edu.cornell -DartifactId=libsndfile-wrapper -Dversion=0.1 -Dpackaging=jar -DgeneratePom=true`
-
-2) bien pensé a ajouter le folder libs/ dnas la variable d'environement PATH
-
-et le programme se lance.
