@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <sndfile.h>
 #include <string.h>
+#include <mpg123.h>
 
 #define true 1
 #define false 0
