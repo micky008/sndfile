@@ -1,11 +1,24 @@
 # sndfile
 
-en C il a été compiler en mingw64.  
+## Intro :
+
+Programme écrit en C il a été compiler en mingw64 et sur une debian [Buster] x64.  
 via msys2 https://www.msys2.org/ package "toolchain" et "sndfile" 
 
-## ligne de compilation
-gcc main.c -l sndfile
+- pour le wav pensez a installer libsndfile-devel et libsndfile  pour compiler et executer
+- pour le mp3 pensez a installer libmpg123-dev et libmpg123 pour compiler et executer
 
-### a vérifer
-pensez a installer libsndfile-devel pour compiler
-et installer la lib libsndfile tout court pour l'execution.
+
+
+## Pour le wav :
+
+### ligne de compilation
+gcc wav.c -l sndfile
+
+## Pour le mp3 :
+
+### ligne de compilation
+gcc mp3.c list.c -l sndfile
+
+
+Le make file viendra plus tard...
