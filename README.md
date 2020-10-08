@@ -18,7 +18,7 @@ gcc wav.c -l sndfile
 ## Pour le mp3 :
 
 ### ligne de compilation
-gcc mp3.c list.c -l sndfile
+gcc mp3.c list.c -l mpg123
 
 
 Le make file viendra plus tard...
