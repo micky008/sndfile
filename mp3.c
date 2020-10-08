@@ -33,7 +33,7 @@ float *myMemcpy(float *src, int debut, int cmb)
 
 options *readOpt(int argc, char *argv[])
 {
-    char *help = "-o outputFolder(without slash at end)\n-i inputFile(zzz.wav,zzz.flac,etc...)\n[-p prefix (yyy) (final result => 01-yyy.mp3))]\n[-b time in ms for silence between 2 songs (408 by default)]\n ";
+    char *help = "-o outputFolder(without slash at end)\n-i inputFile(zzz.mp3)\n[-p prefix (yyy) (final result => 01-yyy.mp3)) [by default AudioTrack]]\n[-b time in ms for silence between 2 songs (408 by default)]\n ";
     if (argc < 5)
     {
         puts(help);
@@ -142,11 +142,13 @@ int main(int argc, char *argv[])
     memset(buf, 0, nsc2);
     size_t sampleCount = 1;
     Liste *liste = newList();
-    while (ret != MPG123_DONE || ret != MPG123_OK)
+    off_t nsc2Total = 0;
+    while (ret != MPG123_DONE || ret != MPG123_OK || nsc2Total >= nsc2)
     {
         ret = mpg123_read(m, buf, nsc2, &sampleCount);
         printf("sample count lu = %d\n", sampleCount);
         previous = 0;
+        nsc2Total += sampleCount;
         for (int i = 0; i < sampleCount; i++)
         {
             gauche = buf[i];
