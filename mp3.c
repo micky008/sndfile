@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     printf("nbFrame %d\n", nsc2);
     printf("rate %d\n", rate);
     printf("temps (en sec) %d\n", nsc2 / rate);
-    short *buf = malloc(nsc2 * sizeof(short));
+    unsigned char *buf = malloc(nsc2 * sizeof(short));
     memset(buf, 0, nsc2);
     size_t sampleCount = 1;
     Liste *liste = newList();
@@ -180,7 +180,6 @@ int main(int argc, char *argv[])
     Element *el = liste->premier;
     long count = 0;
     int nbSong = 1;
-    int ret;
     while (el != NULL)
     {
         char *fileName = getOutTrack(opts, nbSong);
