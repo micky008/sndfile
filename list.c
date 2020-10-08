@@ -15,7 +15,7 @@ Liste *newList()
     element->debut = 0;
     element->fin = 0;
     element->suivant = NULL;
-    liste->dernier = element;
+    liste->premier = element;
     liste->len = 0;
 
     return liste;
@@ -31,10 +31,18 @@ void insertList(Liste *liste, long debut, long fin)
     }
     nouveau->debut = debut;
     nouveau->fin = fin;
+    nouveau->suivant = NULL;
 
-    /* Insertion de l'élément au début de la liste */
-    nouveau->suivant = liste->dernier;
-    liste->dernier = nouveau;
+    /* Insertion de l'élément en fin de liste */
+    // nouveau->suivant = liste->premier;
+    // liste->premier = nouveau;
+
+    Element *tmp = liste->premier;
+    while (tmp->suivant != NULL)
+    {
+        tmp = tmp->suivant;
+    }
+    tmp->suivant = nouveau;
     liste->len = liste->len++;
 }
 
@@ -45,10 +53,10 @@ void deleteList(Liste *liste)
         exit(EXIT_FAILURE);
     }
 
-    if (liste->dernier != NULL)
+    if (liste->premier != NULL)
     {
-        Element *aSupprimer = liste->dernier;
-        liste->dernier = liste->dernier->suivant;
+        Element *aSupprimer = liste->premier;
+        liste->premier = liste->premier->suivant;
         free(aSupprimer);
     }
     free(liste);
@@ -60,7 +68,7 @@ Element *getList(Liste *liste, int pos)
     {
         pos = 0;
     }
-    Element *el = liste->dernier;
+    Element *el = liste->premier;
     int i = 0;
     while (el != NULL)
     {

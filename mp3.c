@@ -177,11 +177,46 @@ int main(int argc, char *argv[])
     }
     printf("I've detect %d songs to write", liste->len);
     int nbSamplePerFrame = mpg123_spf(m);
-    int pos = 0;
-    while (pos < liste->len)
+    Element *el = liste->premier;
+    long count = 0;
+    int nbSong = 1;
+    int ret;
+    while (el != NULL)
     {
+        char *fileName = getOutTrack(opts, nbSong);
+        printf("try to write %s", fileName);
+        FILE *myfile = fopen(fileName, "wb");
+        int max = el->fin - el->debut;
 
-        pos++;
+        while (count < max)
+        {
+            if ((ret = mpg123_framebyframe_next(m)) == MPG123_OK || ret == MPG123_NEW_FORMAT)
+            {
+                unsigned long header;
+                unsigned char *bodydata;
+                size_t bodybytes;
+                if (mpg123_framedata(m, &header, &bodydata, &bodybytes) == MPG123_OK)
+                {
+                    /* Need to extract the 4 header bytes from the native storage in the correct order. */
+                    unsigned char hbuf[4];
+                    int i;
+                    for (i = 0; i < 4; ++i)
+                    {
+                        hbuf[i] = (unsigned char)((header >> ((3 - i) * 8)) & 0xff);
+                    }
+
+                    /* Now write out both header and data, fire and forget. */
+                    fwrite(hbuf, sizeof(unsigned char), 4, myfile);
+                    fwrite(bodydata, bodybytes, 1, myfile);
+                }
+            }
+            count += nbSamplePerFrame;
+        }
+        printf("%s writed", fileName);
+        free(fileName);
+        fclose(myfile);
+        el = el->suivant;
+        nbSong++;
     }
 
     free(opts);

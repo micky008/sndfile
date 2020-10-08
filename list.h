@@ -12,7 +12,7 @@ struct Element
 typedef struct Liste Liste;
 struct Liste
 {
-    Element *dernier;
+    Element *premier;
     int len;
 };
 
