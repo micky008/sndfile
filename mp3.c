@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     size_t sampleCount = 1;
     Liste *liste = newList();
     off_t nsc2Total = 0;
-    while (ret != MPG123_DONE || ret != MPG123_OK || nsc2Total < nsc2)
+    while ((ret != MPG123_DONE || ret != MPG123_OK) && nsc2Total < nsc2)
     {
         ret = mpg123_read(m, buf, nsc2, &sampleCount);
         printf("sample count lu = %d\n", sampleCount);
