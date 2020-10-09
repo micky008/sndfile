@@ -43,17 +43,17 @@ void insertList(Liste *liste, long debut, long fin)
         tmp = tmp->suivant;
     }
     tmp->suivant = nouveau;
-    liste->len = liste->len++;
+    liste->len = liste->len + 1;
 }
 
 void deleteList(Liste *liste)
 {
     if (liste == NULL)
     {
-        exit(EXIT_FAILURE);
+        return;
     }
 
-    if (liste->premier != NULL)
+    while (liste->premier != NULL)
     {
         Element *aSupprimer = liste->premier;
         liste->premier = liste->premier->suivant;

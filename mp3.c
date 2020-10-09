@@ -138,8 +138,8 @@ int main(int argc, char *argv[])
     printf("nbFrame %d\n", nsc2);
     printf("rate %d\n", rate);
     printf("temps (en sec) %d\n", nsc2 / rate);
-    unsigned char *buf = malloc(nsc2 * sizeof(short));
-    memset(buf, 0, nsc2);
+    unsigned char *buf = malloc(nsc2 * sizeof(unsigned char) + 1);
+    memset(buf, 0, nsc2 + 1);
     size_t sampleCount = 1;
     Liste *liste = newList();
     off_t nsc2Total = 0;
@@ -149,17 +149,17 @@ int main(int argc, char *argv[])
         printf("sample count lu = %d\n", sampleCount);
         previous = 0;
         nsc2Total += sampleCount;
-        for (int i = 0; i < sampleCount; i++)
+        for (int i = 0; i < sampleCount / 2; i++)
         {
-            gauche = buf[i];
-            droite = buf[i + 1];
+            gauche = buf[i * channels];
+            droite = buf[i * channels + 1];
             if (gauche == 0 && droite == 0 || (i + 1 > sampleCount))
             {
                 nbBlank = 0;
-                for (; i < sampleCount; i++)
+                for (; i < sampleCount / 2; i++)
                 {
-                    gauche = buf[i];
-                    droite = buf[i + 1];
+                    gauche = buf[i * channels];
+                    droite = buf[i * channels + 1];
                     if (gauche == 0 && droite == 0)
                     {
                         nbBlank++;
@@ -177,48 +177,56 @@ int main(int argc, char *argv[])
             }
         }
     }
-    printf("I've detect %d songs to write", liste->len);
-    int nbSamplePerFrame = mpg123_spf(m);
+    printf("I've detect %d songs to write\n", liste->len);
+
     Element *el = liste->premier;
-    long count = 0;
-    int nbSong = 1;
+
     while (el != NULL)
     {
-        char *fileName = getOutTrack(opts, nbSong);
-        printf("try to write %s", fileName);
-        FILE *myfile = fopen(fileName, "wb");
-        int max = el->fin - el->debut;
-
-        while (count < max)
-        {
-            if ((ret = mpg123_framebyframe_next(m)) == MPG123_OK || ret == MPG123_NEW_FORMAT)
-            {
-                unsigned long header;
-                unsigned char *bodydata;
-                size_t bodybytes;
-                if (mpg123_framedata(m, &header, &bodydata, &bodybytes) == MPG123_OK)
-                {
-                    /* Need to extract the 4 header bytes from the native storage in the correct order. */
-                    unsigned char hbuf[4];
-                    int i;
-                    for (i = 0; i < 4; ++i)
-                    {
-                        hbuf[i] = (unsigned char)((header >> ((3 - i) * 8)) & 0xff);
-                    }
-
-                    /* Now write out both header and data, fire and forget. */
-                    fwrite(hbuf, sizeof(unsigned char), 4, myfile);
-                    fwrite(bodydata, bodybytes, 1, myfile);
-                }
-            }
-            count += nbSamplePerFrame;
-        }
-        printf("%s writed", fileName);
-        free(fileName);
-        fclose(myfile);
+        printf("%d %d\n", el->debut, el->fin);
         el = el->suivant;
-        nbSong++;
     }
+
+    //int nbSamplePerFrame = mpg123_spf(m);
+    // long count = 0;
+    // int nbSong = 1;
+    // while (el != NULL)
+    // {
+    //     char *fileName = getOutTrack(opts, nbSong);
+    //     printf("try to write %s\n", fileName);
+    //     FILE *myfile = fopen(fileName, "wb");
+    //     int max = el->fin - el->debut;
+
+    //     while (count < max)
+    //     {
+    //         if ((ret = mpg123_framebyframe_next(m)) == MPG123_OK || ret == MPG123_NEW_FORMAT)
+    //         {
+    //             unsigned long header;
+    //             unsigned char *bodydata;
+    //             size_t bodybytes;
+    //             if (mpg123_framedata(m, &header, &bodydata, &bodybytes) == MPG123_OK)
+    //             {
+    //                 /* Need to extract the 4 header bytes from the native storage in the correct order. */
+    //                 unsigned char hbuf[4];
+    //                 int i;
+    //                 for (i = 0; i < 4; ++i)
+    //                 {
+    //                     hbuf[i] = (unsigned char)((header >> ((3 - i) * 8)) & 0xff);
+    //                 }
+
+    //                 /* Now write out both header and data, fire and forget. */
+    //                 fwrite(hbuf, sizeof(unsigned char), 4, myfile);
+    //                 fwrite(bodydata, bodybytes, 1, myfile);
+    //             }
+    //         }
+    //         count += nbSamplePerFrame;
+    //     }
+    //     printf("%s writed\n", fileName);
+    //     free(fileName);
+    //     fclose(myfile);
+    //     el = el->suivant;
+    //     nbSong++;
+    // }
 
     free(opts);
     free(buf);
