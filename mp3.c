@@ -33,7 +33,7 @@ float *myMemcpy(float *src, int debut, int cmb)
 
 options *readOpt(int argc, char *argv[])
 {
-    char *help = "-o outputFolder(without slash at end)\n-i inputFile(zzz.mp3)\n[-p prefix (yyy) (final result => 01-yyy.mp3)) [by default AudioTrack]]\n[-b time in ms for silence between 2 songs (408 by default)]\n ";
+    char *help = "-o outputFolder(without slash at end)\n-i inputFile(zzz.mp3)\n[-p prefix (yyy) (final result => 01-yyy.mp3)) [by default AudioTrack]]\n[-b time in ms for silence between 2 songs (408 by default)] [-n nb sample blank 18000 by default]\n ";
     if (argc < 5)
     {
         puts(help);
@@ -85,6 +85,11 @@ options *readOpt(int argc, char *argv[])
         {
             i++;
             opt->outPrefix = argv[i];
+        }
+        else if (strcmp(argv[i], "-n") == 0)
+        {
+            i++;
+            opt->nbBlank = argv[i];
         }
         else
         {
@@ -180,12 +185,6 @@ int main(int argc, char *argv[])
 
     Element *el = liste->premier;
 
-    // while (el != NULL)
-    // {
-    //     printf("%d %d\n", el->debut, el->fin);
-    //     el = el->suivant;
-    // }
-
     int nbSamplePerFrame = mpg123_spf(m);
     mpg123_seek(m, 0, SEEK_SET);
     long count = 0;
@@ -219,7 +218,7 @@ int main(int argc, char *argv[])
                     fwrite(bodydata, bodybytes, 1, myfile);
                 }
             }
-            count += nbSamplePerFrame;
+            count += mpg123_spf(m);
         }
         printf("%s writed\n", fileName);
         free(fileName);
