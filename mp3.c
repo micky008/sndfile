@@ -138,28 +138,29 @@ int main(int argc, char *argv[])
     printf("nbFrame %d\n", nsc2);
     printf("rate %d\n", rate);
     printf("temps (en sec) %d\n", nsc2 / rate);
-    unsigned char *buf = malloc(nsc2 * sizeof(unsigned char) + 1);
-    memset(buf, 0, nsc2 + 1);
+    short *buf = malloc(nsc2 * channels * sizeof(short) + 1);
+    memset(buf, 0, nsc2 * channels + 1);
     size_t sampleCount = 1;
     Liste *liste = newList();
     off_t nsc2Total = 0;
     while ((ret != MPG123_DONE || ret != MPG123_OK) && nsc2Total < nsc2)
     {
-        ret = mpg123_read(m, buf, nsc2, &sampleCount);
+        ret = mpg123_read(m, buf, nsc2 * channels, &sampleCount);
         printf("sample count lu = %d\n", sampleCount);
         previous = 0;
         nsc2Total += sampleCount;
-        for (int i = 0; i < sampleCount / 2; i++)
+        for (int i = 0; i < sampleCount; i++)
         {
-            gauche = buf[i * channels];
-            droite = buf[i * channels + 1];
+            gauche = buf[i];
+            droite = buf[i + 1];
+            printf("%d %d\n", gauche, droite);
             if (gauche == 0 && droite == 0 || (i + 1 > sampleCount))
             {
                 nbBlank = 0;
-                for (; i < sampleCount / 2; i++)
+                for (; i < sampleCount; i++)
                 {
-                    gauche = buf[i * channels];
-                    droite = buf[i * channels + 1];
+                    gauche = buf[i];
+                    droite = buf[i + 1];
                     if (gauche == 0 && droite == 0)
                     {
                         nbBlank++;

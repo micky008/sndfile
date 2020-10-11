@@ -5,17 +5,17 @@
 Liste *newList()
 {
     Liste *liste = malloc(sizeof(Liste));
-    Element *element = malloc(sizeof(Element));
+    //Element *element = malloc(sizeof(Element));
 
-    if (liste == NULL || element == NULL)
+    if (liste == NULL)
     {
         exit(EXIT_FAILURE);
     }
 
-    element->debut = 0;
-    element->fin = 0;
-    element->suivant = NULL;
-    liste->premier = element;
+    //element->debut = 0;
+    //element->fin = 0;
+    //element->suivant = NULL;
+    liste->premier = NULL;
     liste->len = 0;
 
     return liste;
@@ -35,14 +35,22 @@ void insertList(Liste *liste, long debut, long fin)
 
     /* Insertion de l'élément en fin de liste */
     // nouveau->suivant = liste->premier;
-    // liste->premier = nouveau;
+    //
 
     Element *tmp = liste->premier;
-    while (tmp->suivant != NULL)
+    if (tmp != NULL)
     {
-        tmp = tmp->suivant;
+        while (tmp->suivant != NULL)
+        {
+            tmp = tmp->suivant;
+        }
+        tmp->suivant = nouveau;
     }
-    tmp->suivant = nouveau;
+    else
+    {
+        liste->premier = nouveau;
+    }
+
     liste->len = liste->len + 1;
 }
 
