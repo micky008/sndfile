@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
         char *fileName = getOutTrack(opts, nbSong);
         printf("try to write %s\n", fileName);
         FILE *myfile = fopen(fileName, "wb");
-        long max = el->fin - el->debut;
+        long max = (el->fin - el->debut) / 2;
         count = 0;
 
         while (count < max)
