@@ -143,14 +143,13 @@ int main(int argc, char *argv[])
     int channels, enc;
     mpg123_getformat(m, &rate, &channels, &enc);
     size_t buffer_size = mpg123_outblock(m);
-    printf("buf-size = %d\n", buffer_size);
     short *minibuf = calloc(buffer_size, sizeof(short) + 1);
     mpg123_scan(m);
     off_t nsc2 = mpg123_length(m);
     printf("nb de Sample %d\n", nsc2);
     printf("rate %d\n", rate);
     printf("temps (en sec) %d\n", nsc2 / rate);
-    short *buf = calloc(nsc2 * buffer_size, sizeof(short) + 1);
+    short *buf = calloc(nsc2 * 2, sizeof(short) + 1);
     size_t sampleCount = 1;
     Liste *liste = newList();
     unsigned long bufPos = 0;
@@ -201,19 +200,9 @@ int main(int argc, char *argv[])
     printf("I've detect %d songs to write\n", liste->len);
 
     Element *el = liste->premier;
-
-    while (el != NULL)
-    {
-        printf("%d %d = %d\n", el->debut, el->fin, el->fin - el->debut);
-        el = el->suivant;
-    }
-
-    el = liste->premier;
-
     mpg123_seek(m, 0, SEEK_SET);
     long count = 0;
     int nbSong = 1;
-    int spf = mpg123_spf(m);
     while (el != NULL)
     {
         char *fileName = getOutTrack(opts, nbSong);
