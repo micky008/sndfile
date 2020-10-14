@@ -17,7 +17,7 @@ struct options
 
 } typedef options;
 
-float *myMemcpy(float *src, int debut, int cmb)
+float *myMemcpy(short *src, int debut, int cmb)
 {
     float *res = malloc(cmb * 2 * sizeof(float));
     memset(res, 0, cmb * 2);
@@ -89,7 +89,7 @@ options *readOpt(int argc, char *argv[])
         else if (strcmp(argv[i], "-n") == 0)
         {
             i++;
-            opt->nbBlank = argv[i];
+            opt->nbBlank = atoi(argv[i]);
         }
         else
         {
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     short droite = 0;
     int previous = 0;
     int nbBlank = 0;
-    int ret = 0;
+    int ret = 1;
     options *opts = readOpt(argc, argv);
     if (opts == NULL)
     {
@@ -126,76 +126,102 @@ int main(int argc, char *argv[])
     mpg123_handle *m = mpg123_new(NULL, &ret);
     if (m == NULL)
     {
-        fprintf(stderr, "Unable to create mpg123 handle: %s\n", mpg123_plain_strerror(ret));
+        fprintf(stderr, " 1 Unable to create mpg123 handle: %s\n", mpg123_plain_strerror(ret));
+        free(opts);
         return -1;
     }
     mpg123_open(m, opts->inputFile);
     if (m == NULL)
     {
         printf("impossible to read: %s", opts->inputFile);
+        free(opts);
         return -1;
     }
+
+    ret = 1;
     long rate;
     int channels, enc;
     mpg123_getformat(m, &rate, &channels, &enc);
+    size_t buffer_size = mpg123_outblock(m);
+    printf("buf-size = %d\n", buffer_size);
+    short *minibuf = calloc(buffer_size, sizeof(short) + 1);
     mpg123_scan(m);
     off_t nsc2 = mpg123_length(m);
     printf("nb de Sample %d\n", nsc2);
     printf("rate %d\n", rate);
     printf("temps (en sec) %d\n", nsc2 / rate);
-    short *buf = calloc(nsc2 * channels, sizeof(short) + 1);
+    short *buf = calloc(nsc2 * buffer_size, sizeof(short) + 1);
     size_t sampleCount = 1;
     Liste *liste = newList();
-    off_t nsc2Total = 0;
-    while ((ret != MPG123_DONE || ret != MPG123_OK) && nsc2Total < nsc2)
+    unsigned long bufPos = 0;
+    while (ret != MPG123_DONE)
     {
-        ret = mpg123_read(m, buf, nsc2 * channels, &sampleCount);
-        printf("sample count lu = %d\n", sampleCount);
-        previous = 0;
-        nsc2Total += sampleCount;
+        ret = mpg123_read(m, minibuf, buffer_size, &sampleCount);
+        if (ret == MPG123_DONE)
+        {
+            continue;
+        }
         for (int i = 0; i < sampleCount / 2; i++)
         {
-            gauche = buf[i * channels];
-            droite = buf[i * channels + 1];
-            if (gauche == 0 && droite == 0 || (i + 1 > sampleCount))
+            buf[i + bufPos] = minibuf[i];
+        }
+        bufPos += sampleCount / 2 + 1;
+    }
+    free(minibuf);
+    printf("sample count lu = %d\n", bufPos);
+    previous = 0;
+    for (unsigned long i = 0; i < bufPos; i += 2)
+    {
+        gauche = buf[i];
+        droite = buf[i + 1];
+        if (gauche == 0 && droite == 0 || (i + 2 > bufPos))
+        {
+            nbBlank = 0;
+            for (; i < bufPos; i += 2)
             {
-                nbBlank = 0;
-                for (; i < sampleCount / 2; i++)
+                gauche = buf[i];
+                droite = buf[i + 1];
+                if (gauche == 0 && droite == 0)
                 {
-                    gauche = buf[i * channels];
-                    droite = buf[i * channels + 1];
-                    if (gauche == 0 && droite == 0)
-                    {
-                        nbBlank++;
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    nbBlank++;
                 }
-                if (nbBlank > opts->nbBlank || (i + 1 > sampleCount))
+                else
                 {
-                    insertList(liste, previous, i);
-                    previous = i;
+                    break;
                 }
+            }
+            if (nbBlank > opts->nbBlank || (i + 2 > bufPos))
+            {
+                insertList(liste, previous, i);
+                previous = i;
             }
         }
     }
+
     printf("I've detect %d songs to write\n", liste->len);
 
     Element *el = liste->premier;
 
-    int nbSamplePerFrame = mpg123_spf(m);
+    while (el != NULL)
+    {
+        printf("%d %d = %d\n", el->debut, el->fin, el->fin - el->debut);
+        el = el->suivant;
+    }
+
+    el = liste->premier;
+
     mpg123_seek(m, 0, SEEK_SET);
     long count = 0;
     int nbSong = 1;
+    int spf = mpg123_spf(m);
     while (el != NULL)
     {
         char *fileName = getOutTrack(opts, nbSong);
         printf("try to write %s\n", fileName);
         FILE *myfile = fopen(fileName, "wb");
-        int max = el->fin - el->debut;
+        long max = el->fin - el->debut;
         count = 0;
+
         while (count < max)
         {
             if ((ret = mpg123_framebyframe_next(m)) == MPG123_OK || ret == MPG123_NEW_FORMAT)
@@ -207,15 +233,14 @@ int main(int argc, char *argv[])
                 {
                     /* Need to extract the 4 header bytes from the native storage in the correct order. */
                     unsigned char hbuf[4];
-                    int i;
-                    for (i = 0; i < 4; ++i)
+                    for (int i = 0; i < 4; ++i)
                     {
                         hbuf[i] = (unsigned char)((header >> ((3 - i) * 8)) & 0xff);
                     }
 
                     /* Now write out both header and data, fire and forget. */
                     fwrite(hbuf, sizeof(unsigned char), 4, myfile);
-                    fwrite(bodydata, bodybytes, 1, myfile);
+                    fwrite(bodydata, sizeof(unsigned char), bodybytes, myfile);
                 }
             }
             count += mpg123_spf(m);
