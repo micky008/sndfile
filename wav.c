@@ -17,8 +17,7 @@ struct options
 
 float *myMemcpy(float *src, int debut, int cmb)
 {
-	float *res = malloc(cmb * 2 * sizeof(float));
-	memset(res, 0, cmb * 2);
+	float *res = calloc(cmb * 2, sizeof(float));
 	for (int i = 0; i < cmb; i++)
 	{
 		float g = src[(i + debut) * 2];
@@ -55,9 +54,6 @@ options *readOpt(int argc, char *argv[])
 		puts(help);
 		return NULL;
 	}
-	//init struct
-	//nbBlank default = 18000
-	//outSuffix default = "wav"
 	options *opt = malloc(sizeof(options));
 	opt->nbBlank = 18000;
 	opt->outSuffix = "wav";
@@ -102,8 +98,7 @@ options *readOpt(int argc, char *argv[])
 char *getOutTrack(options *opts, int nbSong)
 {
 	int taille = strlen(opts->folderOutput) + 5 + strlen(opts->outPrefix) + strlen(opts->outSuffix); //5 => '000-' and '.'   // c:/folder/000-zik.wav
-	char *res = malloc(taille * sizeof(char));
-	memset(res, 0, taille);
+	char *res = calloc(taille, sizeof(char));
 	sprintf(res, "%s/%00d-%s.%s", opts->folderOutput, nbSong, opts->outPrefix, opts->outSuffix);
 	return res;
 }
@@ -119,7 +114,6 @@ int main(int argc, char *argv[])
 	options *opts = readOpt(argc, argv);
 	if (opts == NULL)
 	{
-		free(opts);
 		return 1;
 	}
 	SF_INFO sfInfo;
@@ -129,8 +123,7 @@ int main(int argc, char *argv[])
 	printf("temps (en sec) %d\n", nsc2 / sfInfo.samplerate);
 	int BUFFER = nsc2 * 2 > 2147483647 ? 2147483647 : nsc2 * 2;
 	int SAMPLE = BUFFER / 2;
-	float *farray = malloc(BUFFER * sizeof(float));
-	memset(farray, 0, BUFFER);
+	float *farray = calloc(BUFFER, sizeof(float));
 	while (sampleCount > 0)
 	{
 		sampleCount = sf_readf_float(sndFile, farray, SAMPLE);
