@@ -12,11 +12,13 @@ struct Element
 typedef struct Liste Liste;
 struct Liste
 {
-    Element *dernier;
+    Element *premier;
     int len;
 };
 
 Liste *newList();
+
+//insert a la fin de la liste.
 void insertList(Liste *liste, long debut, long fin);
 
 //Free les elements ET la liste.

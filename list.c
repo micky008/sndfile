@@ -5,17 +5,17 @@
 Liste *newList()
 {
     Liste *liste = malloc(sizeof(Liste));
-    Element *element = malloc(sizeof(Element));
+    //Element *element = malloc(sizeof(Element));
 
-    if (liste == NULL || element == NULL)
+    if (liste == NULL)
     {
         exit(EXIT_FAILURE);
     }
 
-    element->debut = 0;
-    element->fin = 0;
-    element->suivant = NULL;
-    liste->dernier = element;
+    //element->debut = 0;
+    //element->fin = 0;
+    //element->suivant = NULL;
+    liste->premier = NULL;
     liste->len = 0;
 
     return liste;
@@ -31,24 +31,40 @@ void insertList(Liste *liste, long debut, long fin)
     }
     nouveau->debut = debut;
     nouveau->fin = fin;
+    nouveau->suivant = NULL;
 
-    /* Insertion de l'élément au début de la liste */
-    nouveau->suivant = liste->dernier;
-    liste->dernier = nouveau;
-    liste->len = liste->len++;
+    /* Insertion de l'élément en fin de liste */
+    // nouveau->suivant = liste->premier;
+    //
+
+    Element *tmp = liste->premier;
+    if (tmp != NULL)
+    {
+        while (tmp->suivant != NULL)
+        {
+            tmp = tmp->suivant;
+        }
+        tmp->suivant = nouveau;
+    }
+    else
+    {
+        liste->premier = nouveau;
+    }
+
+    liste->len = liste->len + 1;
 }
 
 void deleteList(Liste *liste)
 {
     if (liste == NULL)
     {
-        exit(EXIT_FAILURE);
+        return;
     }
 
-    if (liste->dernier != NULL)
+    while (liste->premier != NULL)
     {
-        Element *aSupprimer = liste->dernier;
-        liste->dernier = liste->dernier->suivant;
+        Element *aSupprimer = liste->premier;
+        liste->premier = liste->premier->suivant;
         free(aSupprimer);
     }
     free(liste);
@@ -60,7 +76,7 @@ Element *getList(Liste *liste, int pos)
     {
         pos = 0;
     }
-    Element *el = liste->dernier;
+    Element *el = liste->premier;
     int i = 0;
     while (el != NULL)
     {

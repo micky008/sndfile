@@ -119,13 +119,14 @@ int main(int argc, char *argv[])
 	options *opts = readOpt(argc, argv);
 	if (opts == NULL)
 	{
+		free(opts);
 		return 1;
 	}
 	SF_INFO sfInfo;
 	SNDFILE *sndFile = sf_open(opts->inputFile, SFM_READ, &sfInfo);
 	long nsc2 = sfInfo.frames;
 	printf("nbFrame %d\n", nsc2);
-	printf("temps (en sec) %d\n", nsc2 / 44100);
+	printf("temps (en sec) %d\n", nsc2 / sfInfo.samplerate);
 	int BUFFER = nsc2 * 2 > 2147483647 ? 2147483647 : nsc2 * 2;
 	int SAMPLE = BUFFER / 2;
 	float *farray = malloc(BUFFER * sizeof(float));
@@ -137,15 +138,15 @@ int main(int argc, char *argv[])
 		previous = 0;
 		for (int i = 0; i < sampleCount; i++)
 		{
-			gauche = farray[i * 2];
-			droite = farray[i * 2 + 1];
+			gauche = farray[i * sfInfo.channels];
+			droite = farray[i * sfInfo.channels + 1];
 			if (gauche == 0 && droite == 0 || (i + 1 > sampleCount))
 			{
 				nbBlank = 0;
 				for (; i < sampleCount; i++)
 				{
-					gauche = farray[i * 2];
-					droite = farray[i * 2 + 1];
+					gauche = farray[i * sfInfo.channels];
+					droite = farray[i * sfInfo.channels + 1];
 					if (gauche == 0 && droite == 0)
 					{
 						nbBlank++;
@@ -173,6 +174,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+	printf("I've detect %d songs to write\n", nbSong);
 	free(opts);
 	free(farray);
 	sf_close(sndFile);
