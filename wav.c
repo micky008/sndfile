@@ -30,7 +30,7 @@ float *myMemcpy(float *src, int debut, int cmb)
 
 options *readOpt(int argc, char *argv[])
 {
-	char *help = "-o outputFolder(without slash at end)\n-i inputFile(zzz.wav,zzz.flac,etc...)\n[-p prefix (yyy) (final result => 01-yyy.wav))]\n[-b time in ms for silence between 2 songs (408 by default)]\n[-s suffix(wav by default)]\n ";
+	char *help = "-o outputFolder(without slash at end)\n-i inputFile(zzz.wav,zzz.flac,etc...)\n[-p prefix (yyy) (final result => 01-yyy.wav))]\n[-b time in ms for silence between 2 songs (408 by default)]\n[-s suffix(wav by default)]\n[-b nb sample to blank [18000 by default]] ";
 	if (argc < 5)
 	{
 		puts(help);
@@ -84,6 +84,11 @@ options *readOpt(int argc, char *argv[])
 		{
 			i++;
 			opt->outPrefix = argv[i];
+		}
+		else if (strcmp(argv[i], "-b") == 0)
+		{
+			i++;
+			opt->nbBlank = atoi(argv[i]);
 		}
 		else
 		{
