@@ -4,9 +4,6 @@
 #include <mpg123.h>
 #include "list.h"
 
-#define true 1
-#define false 0
-
 struct options
 {
     char *inputFile;
@@ -16,20 +13,6 @@ struct options
     char *outPrefix;
 
 } typedef options;
-
-float *myMemcpy(short *src, int debut, int cmb)
-{
-    float *res = malloc(cmb * 2 * sizeof(float));
-    memset(res, 0, cmb * 2);
-    for (int i = 0; i < cmb; i++)
-    {
-        float g = src[(i + debut) * 2];
-        float d = src[(i + debut) * 2 + 1];
-        res[i * 2] = g;
-        res[i * 2 + 1] = d;
-    }
-    return res;
-}
 
 options *readOpt(int argc, char *argv[])
 {
